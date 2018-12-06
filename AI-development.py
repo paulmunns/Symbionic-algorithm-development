@@ -89,25 +89,33 @@ def predict_algorithm(trained_algorithm, features, labels):
     predictions = trained_algorithm.predict(features)
     pred_labels = np.argmax(predictions, axis=0)
     forest_acc = accuracy_score(labels, predictions) * 100
-    print("Fit accuracy is {:.1f}%".format(forest_acc))
+    return forest_acc
+    #print("Fit accuracy is {:.1f}%".format(forest_acc))
 
 
-folder_train = r'C:\Users\Paul-PC\OneDrive - Avans Hogeschool\TMC\Symbionic ai-development\sample data\new\train\train3\\'
+folder_train = r'C:\Users\Paul-PC\OneDrive - Avans Hogeschool\TMC\Symbionic ai-development\sample data\new\train\train4\\'
 folder_train_more_data = r'C:\Users\Paul-PC\OneDrive - Avans Hogeschool\TMC\Symbionic ai-development\sample data\new\train'
 folder_test = r'C:\Users\Paul-PC\OneDrive - Avans Hogeschool\TMC\Symbionic ai-development\sample data\new\test\train2//'
 # Note: the input window size is in seconds
-window_time = 0.35
-step = 0.11
+#window_time = 0.35
+#step = 0.11
 
 window_array = [0.3, 0.35, 0.4, 0.45, 0.5]
 step_array = [0.062, 0.075, 0.085, 0.1, 0.11, 0.12]
-#training
-data, labels, dt = get_data_multiple_folders(folder_train_more_data, window_time, step)
-CS35_feature = get_features(window_time, data)
-trained_algorithm, features_test, labels_test = train_algorithm(CS35_feature, labels, dt)
-predict_algorithm(trained_algorithm, features_test, labels_test)
+result_lst = []
+for window_size in window_array:
+    for step_size in step_array:
+        #training
+        data, labels, dt = get_data(folder_train, window_size, step_size)
+        CS35_feature = get_features(window_size, data)
+        trained_algorithm, features_test, labels_test = train_algorithm(CS35_feature, labels, dt)
+        accu_train = predict_algorithm(trained_algorithm, features_test, labels_test)
 
-#testing
-data, labels, dt = get_data(folder_test, window_time, step)
-CS35_feature = get_features(window_time, data)
-predict_algorithm(trained_algorithm, CS35_feature, labels)
+        #testing
+        data, labels, dt = get_data(folder_test, window_size, step_size)
+        CS35_feature = get_features(window_size, data)
+        accu_test = predict_algorithm(trained_algorithm, CS35_feature, labels)
+        print("window_size = "+ str(window_size) + " and step_size = "+ str(step_size) + " accuracy(train,test) = " + str(accu_train)+ ' ' + str(accu_test))
+        result_lst.append([window_size, step_size, accu_train, accu_test])
+result_df = pd.DataFrame(result_lst)
+result_df.to_csv('results_window_step_train4_data.csv')
