@@ -2,7 +2,7 @@ import symbionic
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import ExtraTreesClassifier
-import FeaturesComparison
+import Features
 import time
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
@@ -73,7 +73,7 @@ def get_features(window_length, input_data):
     t = window_length
     N = Fs * t
     start_time = time.time()
-    CS35 = FeaturesComparison.CS35(input_data, N, Fs)
+    CS35 = Features.CS35(input_data, N, Fs)
     end_time = time.time() - start_time
     print("preprocessing time of 1 window in ms:" + str(end_time / data.shape[0] * 1000))
     return CS35
