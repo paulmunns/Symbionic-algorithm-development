@@ -16,6 +16,7 @@ def get_data(directory_name, window_length, step_time):
     emg_data.load(directory_name + 'raw3.bin', gesture='g3')
     emg_data.load(directory_name + 'raw4.bin', gesture='g4')
     emg_data.load(directory_name + 'raw5.bin', gesture='g5')
+    emg_data.load(directory_name + 'raw6.bin', gesture='g6')
     emg_data.label_patterns()
     result = emg_data.get_training_samples(window=window_length, step=step_time)
     data = result['X']
@@ -80,7 +81,7 @@ def get_features(window_length, input_data):
 
 def train_algorithm(features_train, labels_train, dt):
     X_train, X_test, y_train, y_test, dt_train, dt_test = train_test_split(features_train, labels_train, dt, test_size=0.2, random_state=9)
-    model = ExtraTreesClassifier(n_estimators=400, max_features="log2", criterion="entropy")
+    model = ExtraTreesClassifier()#n_estimators=400, max_features="log2", criterion="entropy")
     Trees = model.fit(X_train, y_train)
     return Trees, X_test, y_test#, dt_train, dt_test
 
@@ -93,15 +94,12 @@ def predict_algorithm(trained_algorithm, features, labels):
     #print("Fit accuracy is {:.1f}%".format(forest_acc))
 
 
-folder_train = r'C:\Users\Paul-PC\OneDrive - Avans Hogeschool\TMC\Symbionic ai-development\sample data\new\train\train4\\'
+folder_train = r'C:\Users\Paul-PC\OneDrive - Avans Hogeschool\TMC\Symbionic ai-development\sample data\new\train\train1\\'
 folder_train_more_data = r'C:\Users\Paul-PC\OneDrive - Avans Hogeschool\TMC\Symbionic ai-development\sample data\new\train'
 folder_test = r'C:\Users\Paul-PC\OneDrive - Avans Hogeschool\TMC\Symbionic ai-development\sample data\new\test\train2//'
-# Note: the input window size is in seconds
-#window_time = 0.35
-#step = 0.11
 
-window_array = [0.3, 0.35, 0.4, 0.45, 0.5]
-step_array = [0.062, 0.075, 0.085, 0.1, 0.11, 0.12]
+window_array = [0.3, 0.35, 0.4, 0.45, 0.5, 0.6]
+step_array = [0.02, 0.03, 0.04, 0.05, 0.062, 0.075, 0.085, 0.1, 0.11, 0.12, 0.13]
 result_lst = []
 for window_size in window_array:
     for step_size in step_array:
@@ -117,5 +115,5 @@ for window_size in window_array:
         accu_test = predict_algorithm(trained_algorithm, CS35_feature, labels)
         print("window_size = "+ str(window_size) + " and step_size = "+ str(step_size) + " accuracy(train,test) = " + str(accu_train)+ ' ' + str(accu_test))
         result_lst.append([window_size, step_size, accu_train, accu_test])
-result_df = pd.DataFrame(result_lst)
-result_df.to_csv('results_window_step_train4_data.csv')
+result_df = pd.DataFrame(result_lst, columns=['window-size', 'step-size', 'train_accu', 'test-accu'])
+result_df.to_csv('window_step_size_train1_v4-run2.csv')
