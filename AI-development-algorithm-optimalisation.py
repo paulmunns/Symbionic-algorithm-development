@@ -8,6 +8,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import GridSearchCV
+import pickle
 
 
 def get_data(directory_name, window_length, step_time):
@@ -42,6 +43,16 @@ def get_features(window_length, input_data):
     return CS35
 
 
+def evaluate(model, test_features, test_labels):
+    predictions = model.predict(test_features)
+    errors = abs(predictions - test_labels)
+    mape = 100 * np.mean(errors / test_labels)
+    accuracy = 100 - mape
+    print('Model Performance')
+    print('Average Error: {:0.4f} degrees.'.format(np.mean(errors)))
+    print('Accuracy = {:0.2f}%.'.format(accuracy))
+    return np.mean(errors), accuracy
+
 # numbers of trees
 n_estimators = [int(x) for x in np.linspace(start=200, stop = 2000, num=10)]
 # numbers of features to consider at every split
@@ -72,9 +83,14 @@ data, labels, dt = get_data(folder_train, window_time, step)
 CS35_feature = get_features(window_time, data)
 
 from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test_RF, dt_train, dt_test_RF = train_test_split(CS35_feature, labels, dt, test_size=0.2, random_state=9)
+X_train, X_test, y_train, y_test, dt_train, dt_test = train_test_split(CS35_feature, labels, dt, test_size=0.2, random_state=9)
 
 model = ExtraTreesClassifier()
-model_random = GridSearchCV(estimator = model, param_grid = random_grid, cv = 10, verbose=2, n_jobs = -1)
+model_random = GridSearchCV(estimator = model, param_grid = random_grid, cv = 4, verbose=2, n_jobs = -1)
 Trees = model_random.fit(X_train, y_train)
-Trees.best_params_
+best_params = Trees.best_params_
+best_grid = Trees.best_estimator_
+grid_accuracy = evaluate(best_grid, X_test, y_test)
+
+with open('best_params_ExtraTrees', 'w') as f:
+    pickle.dump([best_params, grid_accuracy])
