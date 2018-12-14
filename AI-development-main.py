@@ -80,7 +80,7 @@ def get_features(window_length, input_data):
 
 def train_algorithm(features_train, labels_train, dt):
     X_train, X_test, y_train, y_test, dt_train, dt_test = train_test_split(features_train, labels_train, dt, test_size=0.2, random_state=9)
-    model = ExtraTreesClassifier()#n_estimators=400, max_features="log2", criterion="entropy")
+    model = ExtraTreesClassifier(bootstrap=False, criterion='gini', max_depth=40, max_features='auto', min_samples_leaf=1, min_samples_split=2, n_estimators=600)
     Trees = model.fit(X_train, y_train)
     return Trees, X_test, y_test#, dt_train, dt_test
 
@@ -93,9 +93,9 @@ def predict_algorithm(trained_algorithm, features, labels):
     #print("Fit accuracy is {:.1f}%".format(forest_acc))
 
 
-folder_train = r'C:\Users\Paul-PC\OneDrive - Avans Hogeschool\TMC\Symbionic ai-development\sample data\new\train\train1\\'
-folder_train_more_data = r'C:\Users\Paul-PC\OneDrive - Avans Hogeschool\TMC\Symbionic ai-development\sample data\new\train'
-folder_test = r'C:\Users\Paul-PC\OneDrive - Avans Hogeschool\TMC\Symbionic ai-development\sample data\new\test\train2//'
+folder_train = r'/home/munns/Desktop/Symbionic project/Symbionic-algorithm-development/sample data/new/train/train1/'
+#folder_train_more_data = r'C:\Users\Paul-PC\OneDrive - Avans Hogeschool\TMC\Symbionic ai-development\sample data\new\train'
+folder_test = r'/home/munns/Desktop/Symbionic project/Symbionic-algorithm-development/sample data/new/test/train2/'
 
 # Note: the input window size is in seconds
 window_time = 0.45

@@ -4,7 +4,9 @@ from sklearn.ensemble import ExtraTreesClassifier
 import Features
 import time
 from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import accuracy_score
 import pickle
+import pandas as pd
 
 
 
@@ -43,12 +45,9 @@ def get_features(window_length, input_data):
 def evaluate(model, test_features, test_labels):
     predictions = model.predict(test_features)
     errors = abs(predictions - test_labels)
-    mape = 100 * np.mean(errors / test_labels)
-    accuracy = 100 - mape
-    print('Model Performance')
-    print('Average Error: {:0.4f} degrees.'.format(np.mean(errors)))
-    print('Accuracy = {:0.2f}%.'.format(accuracy))
-    return np.mean(errors), accuracy
+    average_error = np.mean(errors)
+    accuracy = accuracy_score(y_test, predictions) * 100
+    return average_error, accuracy
 
 # numbers of trees
 n_estimators = [int(x) for x in np.linspace(start=200, stop = 2000, num=10)]
@@ -73,7 +72,7 @@ random_grid = {'n_estimators': n_estimators,
                'bootstrap': bootstrap,
                'criterion': criterion}
 
-folder_train = r'C:\Users\Paul-PC\OneDrive - Avans Hogeschool\TMC\Symbionic ai-development\sample data\new\train\train1\\'
+folder_train = r'/home/munns/Desktop/Symbionic project/Symbionic-algorithm-development/sample data/new/train/train1/'
 window_time = 0.45
 step = 0.10
 data, labels, dt = get_data(folder_train, window_time, step)
@@ -83,11 +82,18 @@ from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test, dt_train, dt_test = train_test_split(CS35_feature, labels, dt, test_size=0.2, random_state=9)
 
 model = ExtraTreesClassifier()
-model_random = GridSearchCV(estimator = model, param_grid = random_grid, cv = 4, verbose=2, n_jobs = -1)
+model_random = GridSearchCV(estimator = model, param_grid = random_grid, cv = 4, verbose=8, n_jobs = -1, return_train_score=True)
 Trees = model_random.fit(X_train, y_train)
 best_params = Trees.best_params_
 best_grid = Trees.best_estimator_
 grid_accuracy = evaluate(best_grid, X_test, y_test)
 
-with open('best_params_ExtraTrees', 'w') as f:
-    pickle.dump([best_params, grid_accuracy])
+with open('best_params_ExtraTrees', 'wb') as f:
+    pickle.dump(str(best_params), f)
+
+with open('best_params_accuracy', 'wb') as f:
+    pickle.dump(str(grid_accuracy), f)
+
+resulting = Trees.cv_results_
+df = pd.DataFrame(resulting)
+df.to_csv('CV-scorings.csv', encoding='utf-8')
